@@ -46,18 +46,11 @@ wsrep_node_address="165.232.158.171" //Cambiar por IP
 wsrep_node_name="galeradb1" //cambiar nombre
 wsrep_sst_method=rsync
 
-systemctl restart dbus
-systemctl enable firewalld
-systemctl start firewalld
-systemctl status firewalld
-
-firewall-cmd --zone=public --add-service=mysql --permanent
-firewall-cmd --zone=public --add-port=3306/tcp --permanent
-firewall-cmd --zone=public --add-port=4444/tcp --permanent
-firewall-cmd --zone=public --add-port=4567/tcp --permanent
-firewall-cmd --zone=public --add-port=4568/tcp --permanent
-firewall-cmd --zone=public --add-port=4567/udp --permanent
-firewall-cmd --reload
+script de Firewall
+crear el script con el siguiente comando
+nano firewalldconf.sh 
+copiar y pegar en firewalldconf.sh
+ejecucion: bash firewalldconf.sh
 
 iptables -L
 
