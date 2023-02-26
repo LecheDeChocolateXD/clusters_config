@@ -1,0 +1,86 @@
+ClusterM4riaDB
+
+vi /etc/selinux/config
+SELINUX=disabled
+reboot
+getenforce
+sestatus
+
+yum install openssh-server firewalld less -y
+
+vi /etc/yum.repos.d/MariaDB.repo
+
+[mariadb]
+name = MariaDB
+baseurl = http://yum.mariadb.org/10.3/centos7-amd64
+gpgkey = https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck = 1
+
+--------------------------------------
+yum install MariaDB-server MariaDB-client galera rsync -y
+
+systemctl enable mariadb
+systemctl start mariadb
+systemctl status mariadb
+
+mysql_secure_installation
+
+systemctl stop mariadb
+
+vi /etc/my.cnf.d/server.cnf
+
+[galera]
+# Mandatory settings
+wsrep_on=ON
+wsrep_provider=/usr/lib64/galera/libgalera_smm.so
+wsrep_cluster_address="gcomm://165.232.158.171,143.110.146.214,159.203.65.221" //DireccionesIP Nodo1=165.232.158.171  Nodo2=143.110.146.214 Nodo3=159.203.65.221
+binlog_format=row
+default_storage_engine=InnoDB
+innodb_autoinc_lock_mode=2
+#
+# Allow server to accept connections on all interfaces.
+#
+bind-address=0.0.0.0
+wsrep_cluster_name="Cluster MariaDB"
+wsrep_node_address="165.232.158.171" //Cambiar por IP
+wsrep_node_name="galeradb1" //cambiar nombre
+wsrep_sst_method=rsync
+
+systemctl restart dbus
+systemctl enable firewalld
+systemctl start firewalld
+systemctl status firewalld
+
+firewall-cmd --zone=public --add-service=mysql --permanent
+firewall-cmd --zone=public --add-port=3306/tcp --permanent
+firewall-cmd --zone=public --add-port=4444/tcp --permanent
+firewall-cmd --zone=public --add-port=4567/tcp --permanent
+firewall-cmd --zone=public --add-port=4568/tcp --permanent
+firewall-cmd --zone=public --add-port=4567/udp --permanent
+firewall-cmd --reload
+
+iptables -L
+
+galera_new_cluster // nodo principal
+
+systemctl start mariadb //nodos secundarios
+
+mysql -u root -p //contraseña mysql12345
+show status like 'wsrep_cluster_size'; //en mysql
+
+lsof -i:4567 //nodo de replicacion (LISTEN)
+isof -i:3306 //nodo mysql (LISTEN)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
